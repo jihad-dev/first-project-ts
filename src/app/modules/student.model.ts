@@ -19,12 +19,20 @@ const guardianSchema = new Schema<Guardian>({
 const studentSchema = new Schema<Student>({
     id: { type: String, required: true },
     name: userNameSchema,
-    gender: ['male', 'female'],
+    gender: {
+        type: String,
+        enum: ['male', 'female'],
+        required: true
+    },
     dateOfBirth: { type: String },
     email: { type: String, required: true },
     contactNo: { type: String, required: true },
     emergencyContactNumber: { type: String, required: true },
-    bloodGroup: ['A+', 'A-', 'AB+', 'B+', 'B-', 'O+', 'O-'],
+    bloodGroup: {
+        type: String,
+        enum:['A+', 'A-', 'AB+', 'B+', 'B-', 'O+', 'O-'],
+        
+    },
     presentAddress: { type: String, required: true },
     permanentAddress: { type: String, required: true },
     guardian: guardianSchema,
