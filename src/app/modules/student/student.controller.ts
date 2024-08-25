@@ -1,13 +1,26 @@
 import { Request, Response } from "express";
 import { StudentServices } from "./student.service";
+import studentValidationSchema from "./student.validation";
 
 const createStudent = async (req: Request, res: Response) => {
 
     try {
+
+
         const { student: studentData } = req.body;
+        const { error } = studentValidationSchema.validate(studentData);
+        const result = await StudentServices.createStudentToDB(studentData);
+
+        if (error) {
+            res.status(500).json({
+                success: false,
+                message: "Something went wrong",
+                error: error.details
+            })
+        }
 
         // will cal service func to send this data
-        const result = await StudentServices.createStudentToDB(studentData);
+
         // send response
 
         res.status(200).json({
@@ -16,7 +29,11 @@ const createStudent = async (req: Request, res: Response) => {
             data: result
         })
     } catch (error) {
-        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: error
+        })
 
     }
 }
