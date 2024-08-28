@@ -1,96 +1,66 @@
-import { Schema, model } from 'mongoose';
-import { Guardian, Student, UserName } from './student.interface';
-// import validator from 'validator';
-const userNameSchema = new Schema<UserName>({
-    firstName: {
-        type: String,
-        trim: true,
-        required: [true, 'First name is required'],
-        unique: true,
-        // maxlength: [20, 'first name more then 20 '],
-        // validate: {
-        //     validator: function (value: string) {
-        //         const FirstNameStr = value.charAt(0).toUpperCase() + value.slice(1);
-        //         return FirstNameStr === value;
-        //     },
-        //     message: '{VALUE} is not capitalized format'
-        // }
+import { TStudent, StudentModel } from "./student.interface";
+import { Schema, model } from "mongoose";
 
-    },
-    middleName: { type: String },
-    lastName: {
-        type: String, required: true,
-        // validate: {
-        //     validator: (value: string) => validator.isAlpha(value),
-        //     message: '{VALUE} is not a valid'
-        // },
-
-
-    },
-})
-
-const guardianSchema = new Schema<Guardian>({
+const guardianSchema = new Schema({
     fatherName: { type: String, required: true },
     fatherOccupation: { type: String, required: true },
     fatherContactNumber: { type: String, required: true },
     motherName: { type: String, required: true },
     motherOccupation: { type: String, required: true },
     motherContactNumber: { type: String, required: true },
-})
+});
 
-const studentSchema = new Schema<Student>({
-    id: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    name: {
-        type: userNameSchema,
-        required: true,
-    },
-    gender: {
-        type: String,
-        enum: {
-            values: ['male', 'female'],
-            message: "the gender field can only be one following : 'male' ,'female'"
-        },
-        required: true
-    },
-    dateOfBirth: { type: String },
-    email: {
-         type: String,
-          required: true, 
-          unique: true ,
-        //   validate:{
-        //     validator: (value:string) =>validator.isEmail(value),
-        //     message:'{VALUE} is not a valid email'
-        //   }
-
-    },
+const localGuardianSchema = new Schema({
+    name: { type: String, required: true },
+    occupation: { type: String, required: true },
     contactNo: { type: String, required: true },
-    emergencyContactNumber: { type: String, required: true },
-    bloodGroup: {
-        type: String,
-        enum: ['A+', 'A-', 'AB+', 'B+', 'B-', 'O+', 'O-'],
+    address: { type: String, required: true },
+});
 
-    },
+const userNameSchema = new Schema({
+    firstName: { type: String, required: true },
+    middleName: { type: String },
+    lastName: { type: String, required: true },
+});
+
+const studentSchema = new Schema<TStudent, StudentModel>({
+    id: { type: String, required: true },
+    name: { type: userNameSchema, required: true },
+    gender: { type: String, enum: ['male', 'female'], required: true },
+    dateOfBirth: { type: String },
+    email: { type: String, required: true },
+    contactNo: { type: String, required: true },
+    localGuardian: { type: localGuardianSchema, required: true },
+    emergencyContactNumber: { type: String, required: true },
+    bloodGroup: { type: String, enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] },
     presentAddress: { type: String, required: true },
     permanentAddress: { type: String, required: true },
-    guardian: {
-        type: guardianSchema,
-        required: true,
-    },
+    guardian: { type: guardianSchema, required: true },
     profileImg: { type: String },
-    isActive: {
-        type: String,
-        required: true,
-        enum: ['active', 'disabled'],
-        default: "active",
-    }
-})
+    isActive: { type: String, enum: ['active', 'disabled'], required: true },
+});
+
+
+// creating a custom instance 
+
+
+studentSchema.statics.isUserExists = async function (id: string) {
+    const existingUser = await Student.findOne({ id });
+    return existingUser;
+
+}
 
 
 
-// create a  model
+// studentSchema.methods.isUserExits = async function (id: string) {
+//     const existingUser = await Student.findOne({ id });
+//     return existingUser;
+// }
 
-export const StudentModel = model<Student>('Student', studentSchema)
+
+
+
+
+export const Student = model<TStudent, StudentModel>('Student', studentSchema);
+
+
