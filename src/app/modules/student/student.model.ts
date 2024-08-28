@@ -1,5 +1,7 @@
 import { TStudent, StudentModel } from "./student.interface";
 import { Schema, model } from "mongoose";
+import bcrypt from 'bcrypt';
+import config from "../../config";
 
 const guardianSchema = new Schema({
     fatherName: { type: String, required: true },
@@ -25,6 +27,7 @@ const userNameSchema = new Schema({
 
 const studentSchema = new Schema<TStudent, StudentModel>({
     id: { type: String, required: true },
+    password: { type: String, required: [true, 'password is required'], unique: true, maxlength: [20, 'password must be more than 20 characters'] },
     name: { type: userNameSchema, required: true },
     gender: { type: String, enum: ['male', 'female'], required: true },
     dateOfBirth: { type: String },
@@ -49,6 +52,26 @@ studentSchema.statics.isUserExists = async function (id: string) {
     return existingUser;
 
 }
+
+// hashing password and save to database //
+
+
+studentSchema.pre('save', async function (next) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const user = this;
+    user.password = await bcrypt.hash(user.password, Number(config.bcrypt_salt_rounds))
+    next();
+})
+
+
+
+// post middleware
+studentSchema.post('save', function (doc, next) {
+    doc.password = ""
+    next();
+})
+
+
 
 
 
